@@ -9,7 +9,7 @@
     "start:cli": "INTERFACE=cli tsx src/index.ts",
     "start:web": "INTERFACE=web tsx src/index.ts",
     "start:discord": "INTERFACE=discord tsx src/index.ts",
-    "build": "tsc && yarn build:client",
+    "build": "tsgo && yarn build:client",
     "build:client": "vite build --config src/interfaces/web/client/vite.config.ts",
     "dev:client": "vite dev --config src/interfaces/web/client/vite.config.ts",
     "start:prod": "node dist/index.js",
@@ -52,10 +52,10 @@
     "@types/react": "^19.2.14",
     "@types/react-dom": "^19.2.3",
     "@types/ws": "^8.18.1",
+    "@typescript/native-preview": "beta",
     "@vitejs/plugin-react": "^6.0.1",
     "@vitest/coverage-v8": "^4.1.5",
     "tsx": "^4.21.0",
-    "typescript": "^6.0.3",
     "vite": "^8.0.10",
     "vitest": "^4.1.5"
   }

@@ -127,8 +127,8 @@ yarn test
 # Watch mode
 yarn test:watch
 
-# Type-check backend
-yarn dlx tsc --noEmit
+# Type-check backend (tsgo = TypeScript 7 native compiler from @typescript/native-preview)
+yarn dlx tsgo --noEmit
 
 # Build everything (backend + React frontend)
 yarn build
@@ -141,15 +141,18 @@ yarn build
 ```
 src/
 ├── config.ts                       # t3-env validated configuration
+├── config.test.ts                  # ← colocated test
 ├── index.ts                        # Entry point — interface launcher
 ├── prompts/
 │   └── system.ts                   # Zypher Ghost system prompt
 ├── llm/
 │   ├── session.ts                  # Chat session & message history
+│   ├── session.test.ts             # ← colocated test
 │   ├── client.ts                   # OllamaClient (streaming)
 │   └── index.ts                    # Re-exports
 ├── vault/
-│   └── obsidian.ts                 # Obsidian vault reader + full-text search
+│   ├── obsidian.ts                 # Obsidian vault reader + full-text search
+│   └── obsidian.test.ts            # ← colocated test
 └── interfaces/
     ├── cli.ts                      # Interactive CLI
     ├── discord/
@@ -163,7 +166,7 @@ src/
         │   └── ws.controller.ts    # WebSocket handler
         ├── client/                 # React frontend (Vite)
         │   ├── index.html
-        │   ├── vite.config.ts
+        │   ├── vite.config.ts      # Frontend Vite build config
         │   └── src/
         │       ├── main.tsx
         │       ├── App.tsx         # MUI theme + TanStack Router + Query providers
@@ -176,9 +179,6 @@ src/
         │           ├── ChatPage.tsx
         │           └── InfoPage.tsx
         └── public/                 # Compiled React output (served by Express)
-tests/
-├── config.test.ts
-├── llm.test.ts
-└── vault.test.ts
+vite.config.ts                      # Root Vite/Vitest config (backend tests)
 ```
 

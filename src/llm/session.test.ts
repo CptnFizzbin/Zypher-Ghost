@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeEach } from 'vitest';
-import { createSession } from '../src/llm/index.js';
+import { createSession } from './index.js';
 
 describe('createSession', () => {
   it('starts with an empty message list', () => {
@@ -30,7 +30,6 @@ describe('createSession', () => {
   });
 
   it('enforces history limit', () => {
-    // config.historyLimit defaults to 20 — use a mock env override
     const session = createSession();
     // Add 25 messages
     for (let i = 0; i < 25; i++) {

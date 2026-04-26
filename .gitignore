@@ -9,6 +9,9 @@ lerna-debug.log*
 # Compiled React frontend (built by Vite)
 src/interfaces/web/public/
 
+# npm lock file (project uses yarn)
+package-lock.json
+
 # Diagnostic reports (https://nodejs.org/api/report.html)
 report.[0-9]*.[0-9]*.[0-9]*.[0-9]*.json
 
