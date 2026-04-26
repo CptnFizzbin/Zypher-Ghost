@@ -1,4 +1,4 @@
-import { describe, it, expect, beforeEach, afterAll } from '@jest/globals';
+import { describe, it, expect, beforeEach, afterAll } from 'vitest';
 import { mkdtemp, writeFile, mkdir, rm } from 'fs/promises';
 import path from 'path';
 import os from 'os';

@@ -6,7 +6,7 @@ import {
   ActivityType,
   ChannelType,
 } from 'discord.js';
-import { OllamaClient, createSession } from '../../llm/ollama.js';
+import { OllamaClient, createSession } from '../../llm/index.js';
 import { ObsidianVault } from '../../vault/obsidian.js';
 import { config } from '../../config.js';
 

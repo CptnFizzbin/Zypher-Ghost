@@ -1,4 +1,4 @@
-import { describe, it, expect } from '@jest/globals';
+import { describe, it, expect } from 'vitest';
 
 // Mock dotenv to avoid needing a .env file in tests
 process.env.OLLAMA_HOST = 'http://test-host:11434';

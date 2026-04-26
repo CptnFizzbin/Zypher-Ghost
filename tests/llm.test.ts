@@ -1,5 +1,5 @@
-import { describe, it, expect, beforeEach } from '@jest/globals';
-import { createSession } from '../src/llm/ollama.js';
+import { describe, it, expect, beforeEach } from 'vitest';
+import { createSession } from '../src/llm/index.js';
 
 describe('createSession', () => {
   it('starts with an empty message list', () => {

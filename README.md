@@ -10,15 +10,17 @@
 - 💬 **Three chat interfaces**:
   - **CLI** — Interactive readline terminal chat
   - **Discord Bot** — Respond to mentions in servers and direct messages
-  - **Web UI** — Streaming chat in the browser via WebSocket
+  - **Web UI** — React + MUI streaming chat with TanStack Router & Query
 - 📓 **Obsidian Vault integration** — Searches your `.md` notes and injects relevant context into the LLM prompt automatically
 - 🎲 **Shadowrun persona** — Pre-configured system prompt for *Zypher Ghost*, a tactical street-AI fixer character
+- ✅ **Type-safe config** — Environment validated at startup via [t3-env](https://env.t3.gg/)
 
 ---
 
 ## Prerequisites
 
 - [Node.js](https://nodejs.org/) v20+
+- [Yarn](https://yarnpkg.com/) (`npm install -g yarn`)
 - [Ollama](https://ollama.com/) running locally (or accessible over the network)
 - A pulled Ollama model (e.g. `ollama pull llama3.2`)
 - *(Optional)* A Discord application/bot token for the Discord interface
@@ -31,7 +33,7 @@
 ```bash
 git clone https://github.com/CptnFizzbin/Zypher-Ghost.git
 cd Zypher-Ghost
-npm install
+yarn install
 ```
 
 ---
@@ -64,9 +66,9 @@ cp .env.example .env
 ### Command Line
 
 ```bash
-npm run start:cli
+yarn start:cli
 # or
-INTERFACE=cli npm start
+INTERFACE=cli yarn start
 ```
 
 **CLI commands:**
@@ -79,11 +81,21 @@ INTERFACE=cli npm start
 
 ### Web Interface
 
+Build the React frontend first, then start the server:
+
 ```bash
-npm run start:web
+yarn build:client   # compile React → src/interfaces/web/public/
+yarn start:web      # start Express + WebSocket server
 ```
 
-Open `http://localhost:3000` in your browser. The UI streams responses in real-time.
+Or run the Vite dev server (with HMR) alongside the backend:
+
+```bash
+yarn dev:client     # Vite on :5173, proxies /api and /ws to :3000
+yarn start:web      # backend on :3000
+```
+
+Open `http://localhost:3000` (prod) or `http://localhost:5173` (dev) in your browser.
 
 ### Discord Bot
 
@@ -93,7 +105,7 @@ Open `http://localhost:3000` in your browser. The UI streams responses in real-t
 4. Invite the bot with the `bot` scope and `Send Messages`, `Read Message History`, `Message Content` permissions
 
 ```bash
-npm run start:discord
+yarn start:discord
 ```
 
 The bot responds when **mentioned** in servers, and in every **DM**.
@@ -101,7 +113,7 @@ The bot responds when **mentioned** in servers, and in every **DM**.
 ### All Interfaces
 
 ```bash
-INTERFACE=all npm start
+INTERFACE=all yarn start
 ```
 
 ---
@@ -109,14 +121,17 @@ INTERFACE=all npm start
 ## Development
 
 ```bash
-# Run tests
-npm test
+# Run tests (vitest)
+yarn test
 
-# Type-check
-npx tsc --noEmit
+# Watch mode
+yarn test:watch
 
-# Build to dist/
-npm run build
+# Type-check backend
+yarn dlx tsc --noEmit
+
+# Build everything (backend + React frontend)
+yarn build
 ```
 
 ---
@@ -125,22 +140,45 @@ npm run build
 
 ```
 src/
-├── config.ts                   # Env-based configuration
-├── index.ts                    # Entry point — interface launcher
+├── config.ts                       # t3-env validated configuration
+├── index.ts                        # Entry point — interface launcher
+├── prompts/
+│   └── system.ts                   # Zypher Ghost system prompt
 ├── llm/
-│   └── ollama.ts               # Ollama client + chat session management
+│   ├── session.ts                  # Chat session & message history
+│   ├── client.ts                   # OllamaClient (streaming)
+│   └── index.ts                    # Re-exports
 ├── vault/
-│   └── obsidian.ts             # Obsidian vault reader + full-text search
+│   └── obsidian.ts                 # Obsidian vault reader + full-text search
 └── interfaces/
-    ├── cli.ts                  # Interactive CLI
+    ├── cli.ts                      # Interactive CLI
     ├── discord/
-    │   └── bot.ts              # Discord bot
+    │   └── bot.ts                  # Discord bot
     └── web/
-        ├── server.ts           # Express + WebSocket server
-        └── public/
-            └── index.html      # Web chat UI
+        ├── server.ts               # Entry point — wires services & controllers
+        ├── services/
+        │   └── chat.service.ts     # Vault + LLM service factories
+        ├── controllers/
+        │   ├── info.controller.ts  # GET /api/info
+        │   └── ws.controller.ts    # WebSocket handler
+        ├── client/                 # React frontend (Vite)
+        │   ├── index.html
+        │   ├── vite.config.ts
+        │   └── src/
+        │       ├── main.tsx
+        │       ├── App.tsx         # MUI theme + TanStack Router + Query providers
+        │       ├── hooks/
+        │       │   └── useChat.ts  # WebSocket chat hook
+        │       ├── components/
+        │       │   ├── ChatMessage.tsx
+        │       │   └── ChatInput.tsx
+        │       └── routes/
+        │           ├── ChatPage.tsx
+        │           └── InfoPage.tsx
+        └── public/                 # Compiled React output (served by Express)
 tests/
 ├── config.test.ts
 ├── llm.test.ts
 └── vault.test.ts
 ```
+
