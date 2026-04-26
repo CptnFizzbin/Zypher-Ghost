@@ -1,0 +1,390 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Zypher Ghost — Shadowrun AI</title>
+  <style>
+    :root {
+      --bg: #0d0d0d;
+      --surface: #1a1a1a;
+      --surface2: #242424;
+      --accent: #00ff9d;
+      --accent2: #00b86e;
+      --text: #e0e0e0;
+      --muted: #888;
+      --danger: #ff4444;
+      --user-bubble: #1e3a2f;
+      --bot-bubble: #1a2430;
+      --system-color: #666;
+      --border: #2e2e2e;
+      --radius: 12px;
+      --font: 'Courier New', Courier, monospace;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: var(--font);
+      height: 100dvh;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+
+    header {
+      background: var(--surface);
+      border-bottom: 1px solid var(--border);
+      padding: 12px 20px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      flex-shrink: 0;
+    }
+
+    header .logo {
+      font-size: 1.3rem;
+      font-weight: bold;
+      color: var(--accent);
+      letter-spacing: 1px;
+    }
+
+    header .subtitle {
+      font-size: 0.75rem;
+      color: var(--muted);
+    }
+
+    header .status {
+      margin-left: auto;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 0.75rem;
+      color: var(--muted);
+    }
+
+    .status-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: var(--danger);
+      transition: background 0.3s;
+    }
+
+    .status-dot.online { background: var(--accent); }
+
+    #chat {
+      flex: 1;
+      overflow-y: auto;
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .message {
+      max-width: 80%;
+      padding: 10px 14px;
+      border-radius: var(--radius);
+      line-height: 1.6;
+      font-size: 0.9rem;
+      white-space: pre-wrap;
+      word-break: break-word;
+    }
+
+    .message.user {
+      background: var(--user-bubble);
+      border: 1px solid #2e5040;
+      align-self: flex-end;
+      color: #c8fce8;
+    }
+
+    .message.bot {
+      background: var(--bot-bubble);
+      border: 1px solid #2a3a4a;
+      align-self: flex-start;
+    }
+
+    .message.system {
+      background: transparent;
+      border: none;
+      color: var(--system-color);
+      font-size: 0.75rem;
+      align-self: center;
+      text-align: center;
+      font-style: italic;
+    }
+
+    .message .sender {
+      font-size: 0.7rem;
+      font-weight: bold;
+      margin-bottom: 4px;
+      color: var(--accent);
+      letter-spacing: 0.5px;
+    }
+
+    .message.user .sender { color: #5dffba; text-align: right; }
+
+    .cursor {
+      display: inline-block;
+      width: 8px;
+      height: 1em;
+      background: var(--accent);
+      vertical-align: text-bottom;
+      animation: blink 0.7s steps(1) infinite;
+    }
+
+    @keyframes blink {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0; }
+    }
+
+    footer {
+      background: var(--surface);
+      border-top: 1px solid var(--border);
+      padding: 12px 20px;
+      display: flex;
+      gap: 10px;
+      flex-shrink: 0;
+    }
+
+    #input {
+      flex: 1;
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      color: var(--text);
+      font-family: var(--font);
+      font-size: 0.9rem;
+      padding: 10px 14px;
+      resize: none;
+      outline: none;
+      transition: border-color 0.2s;
+      min-height: 44px;
+      max-height: 160px;
+    }
+
+    #input:focus { border-color: var(--accent2); }
+
+    #input::placeholder { color: var(--muted); }
+
+    button {
+      background: var(--accent2);
+      color: #000;
+      border: none;
+      border-radius: var(--radius);
+      padding: 10px 18px;
+      font-family: var(--font);
+      font-size: 0.85rem;
+      font-weight: bold;
+      cursor: pointer;
+      letter-spacing: 0.5px;
+      transition: background 0.2s;
+      white-space: nowrap;
+    }
+
+    button:hover { background: var(--accent); }
+    button:disabled { background: #333; color: #666; cursor: not-allowed; }
+
+    #reset-btn {
+      background: transparent;
+      color: var(--muted);
+      border: 1px solid var(--border);
+    }
+
+    #reset-btn:hover { background: var(--surface2); color: var(--text); }
+
+    #chat::-webkit-scrollbar { width: 6px; }
+    #chat::-webkit-scrollbar-track { background: transparent; }
+    #chat::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+
+    @media (max-width: 600px) {
+      .message { max-width: 95%; }
+    }
+  </style>
+</head>
+<body>
+
+<header>
+  <div>
+    <div class="logo">⚡ ZYPHER GHOST</div>
+    <div class="subtitle">Shadowrun AI Assistant</div>
+  </div>
+  <div class="status">
+    <div class="status-dot" id="status-dot"></div>
+    <span id="status-text">Connecting...</span>
+  </div>
+</header>
+
+<div id="chat"></div>
+
+<footer>
+  <textarea
+    id="input"
+    placeholder="Talk to Zypher Ghost... (Enter to send, Shift+Enter for newline)"
+    rows="1"
+    autofocus
+  ></textarea>
+  <button id="reset-btn" title="Clear conversation">↺ Reset</button>
+  <button id="send-btn">Send ▶</button>
+</footer>
+
+<script>
+  const chat = document.getElementById('chat');
+  const input = document.getElementById('input');
+  const sendBtn = document.getElementById('send-btn');
+  const resetBtn = document.getElementById('reset-btn');
+  const statusDot = document.getElementById('status-dot');
+  const statusText = document.getElementById('status-text');
+
+  let ws = null;
+  let currentBotEl = null;
+  let isStreaming = false;
+
+  function setStatus(online, text) {
+    statusDot.className = 'status-dot' + (online ? ' online' : '');
+    statusText.textContent = text;
+  }
+
+  function appendMessage(role, text) {
+    const div = document.createElement('div');
+    div.className = `message ${role}`;
+    if (role === 'user' || role === 'bot') {
+      const sender = document.createElement('div');
+      sender.className = 'sender';
+      sender.textContent = role === 'user' ? 'YOU' : 'ZYPHER GHOST';
+      div.appendChild(sender);
+    }
+    const content = document.createElement('span');
+    content.textContent = text;
+    div.appendChild(content);
+    chat.appendChild(div);
+    chat.scrollTop = chat.scrollHeight;
+    return div;
+  }
+
+  function startBotMessage() {
+    const div = document.createElement('div');
+    div.className = 'message bot';
+    const sender = document.createElement('div');
+    sender.className = 'sender';
+    sender.textContent = 'ZYPHER GHOST';
+    div.appendChild(sender);
+    const content = document.createElement('span');
+    div.appendChild(content);
+    const cursor = document.createElement('span');
+    cursor.className = 'cursor';
+    div.appendChild(cursor);
+    chat.appendChild(div);
+    chat.scrollTop = chat.scrollHeight;
+    return { div, content, cursor };
+  }
+
+  function appendChunk(content, text) {
+    content.textContent += text;
+    chat.scrollTop = chat.scrollHeight;
+  }
+
+  function finishBotMessage(cursor) {
+    cursor.remove();
+    chat.scrollTop = chat.scrollHeight;
+  }
+
+  function connect() {
+    const proto = location.protocol === 'https:' ? 'wss' : 'ws';
+    ws = new WebSocket(`${proto}://${location.host}/ws`);
+
+    ws.onopen = () => {
+      setStatus(true, 'Online');
+      sendBtn.disabled = false;
+      input.disabled = false;
+    };
+
+    ws.onclose = () => {
+      setStatus(false, 'Disconnected — reconnecting...');
+      sendBtn.disabled = true;
+      setTimeout(connect, 3000);
+    };
+
+    ws.onerror = () => {
+      setStatus(false, 'Connection error');
+    };
+
+    ws.onmessage = (event) => {
+      const data = JSON.parse(event.data);
+
+      if (data.type === 'system') {
+        appendMessage('system', data.content);
+      } else if (data.type === 'chunk') {
+        if (!currentBotEl) {
+          currentBotEl = startBotMessage();
+          isStreaming = true;
+        }
+        appendChunk(currentBotEl.content, data.content);
+      } else if (data.type === 'done') {
+        if (currentBotEl) {
+          finishBotMessage(currentBotEl.cursor);
+          currentBotEl = null;
+        }
+        isStreaming = false;
+        sendBtn.disabled = false;
+        input.disabled = false;
+        input.focus();
+      } else if (data.type === 'error') {
+        if (currentBotEl) {
+          finishBotMessage(currentBotEl.cursor);
+          currentBotEl = null;
+        }
+        appendMessage('system', '⚠ ' + data.content);
+        isStreaming = false;
+        sendBtn.disabled = false;
+        input.disabled = false;
+        input.focus();
+      }
+    };
+  }
+
+  function sendMessage() {
+    const text = input.value.trim();
+    if (!text || isStreaming || !ws || ws.readyState !== WebSocket.OPEN) return;
+
+    appendMessage('user', text);
+    input.value = '';
+    input.style.height = 'auto';
+    sendBtn.disabled = true;
+    input.disabled = true;
+
+    ws.send(JSON.stringify({ type: 'message', content: text }));
+  }
+
+  sendBtn.addEventListener('click', sendMessage);
+
+  input.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter' && !e.shiftKey) {
+      e.preventDefault();
+      sendMessage();
+    }
+  });
+
+  input.addEventListener('input', () => {
+    input.style.height = 'auto';
+    input.style.height = Math.min(input.scrollHeight, 160) + 'px';
+  });
+
+  resetBtn.addEventListener('click', () => {
+    if (ws && ws.readyState === WebSocket.OPEN) {
+      ws.send(JSON.stringify({ type: 'reset' }));
+      chat.innerHTML = '';
+    }
+  });
+
+  // Start connection
+  setStatus(false, 'Connecting...');
+  sendBtn.disabled = true;
+  connect();
+</script>
+
+</body>
+</html>

@@ -1,0 +1,38 @@
+{
+  "name": "zypher-ghost",
+  "version": "1.0.0",
+  "description": "Shadowrun AI Assistant powered by Ollama — CLI, Discord, and Web chat interfaces with Obsidian Vault integration",
+  "type": "module",
+  "main": "dist/index.js",
+  "scripts": {
+    "start": "tsx src/index.ts",
+    "start:cli": "INTERFACE=cli tsx src/index.ts",
+    "start:web": "INTERFACE=web tsx src/index.ts",
+    "start:discord": "INTERFACE=discord tsx src/index.ts",
+    "build": "tsc",
+    "start:prod": "node dist/index.js",
+    "test": "node --experimental-vm-modules node_modules/.bin/jest",
+    "test:coverage": "node --experimental-vm-modules node_modules/.bin/jest --coverage"
+  },
+  "keywords": ["shadowrun", "ollama", "discord", "llm", "ai", "obsidian"],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "discord.js": "^14.26.3",
+    "dotenv": "^17.4.2",
+    "express": "^5.2.1",
+    "glob": "^11.1.0",
+    "ollama": "^0.6.3",
+    "ws": "^8.20.0"
+  },
+  "devDependencies": {
+    "@types/express": "^5.0.6",
+    "@types/jest": "^30.0.0",
+    "@types/node": "^25.6.0",
+    "@types/ws": "^8.18.1",
+    "jest": "^30.3.0",
+    "ts-jest": "^29.4.9",
+    "tsx": "^4.21.0",
+    "typescript": "^6.0.3"
+  }
+}
